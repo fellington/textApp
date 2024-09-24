@@ -1,18 +1,17 @@
-import { View, Text, StyleSheet, TextInput, ActivityIndicator, Button, KeyboardAvoidingView } from 'react-native';
+import { View, Text, StyleSheet, TextInput, ActivityIndicator, Button, KeyboardAvoidingView, Linking, Alert } from 'react-native';
 import React, { useState } from 'react';
 import { FIREBASE_AUTH } from '../../FirebaseConfig';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 
 const Login = () => {
     const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const auth = FIREBASE_AUTH;
 
     const signIn = async () => {
         setLoading(true);
         try {
-            const response = await signInWithEmailAndPassword(auth, email + '@example.com', email);
+            const response = await signInWithEmailAndPassword(auth, email + '@example.com', email.toLowerCase());
             console.log(response);
         } catch (error: any) {
             console.log(error);
@@ -22,19 +21,22 @@ const Login = () => {
         }
     }
 
-    const signUp = async () => {
-        setLoading(true);
-        try {
-            const response = await createUserWithEmailAndPassword(auth, email + '@example.com', email);
-            console.log(response);
-            alert('Sign up successful!');
-        } catch (error: any) {
-            console.log(error);
-            alert('Registration failed: ' + error.message);
-        } finally {
-            setLoading(false);
-        }
-    }
+    const signUp = () => {
+        const emailAddress = 'herolab@uci.edu';
+        const subject = 'Account Creation Request';
+        const body = 'Hello, I would like to create an account for the Preeclampsia Educational Project Study. Please provide further instructions.';
+
+        // Open the email client with a pre-filled email to 'herolab@uci.edu'
+        Linking.openURL(`mailto:${emailAddress}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`)
+            .catch((err) => {
+                console.log('Error opening email client: ', err);
+                Alert.alert(
+                    'Error',
+                    'Unable to open email client. Please manually email herolab@uci.edu to create an account.',
+                    [{ text: 'OK' }]
+                );
+            });
+    };
 
     return (
         <View style={styles.container}>
@@ -77,10 +79,10 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff'
     },
     text: {
-        fontSize:30,
+        fontSize:50,
         textAlign: 'center',
         color: 'black',
-        marginTop: 70,
         marginHorizontal:5,
+        marginBottom:70,
     }
 });

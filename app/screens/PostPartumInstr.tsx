@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
   },
   backButton: {
     position: 'absolute',
-    top: 40,
+    top: 70,
     left: 20,
     zIndex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.6)', 
