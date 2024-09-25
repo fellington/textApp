@@ -1,9 +1,42 @@
-import React from 'react';
-import {SafeAreaView, View, Text, TouchableOpacity, StyleSheet, ScrollView, Linking} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { SafeAreaView, View, Text, TouchableOpacity, StyleSheet, ScrollView, Linking } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { logEvent } from 'firebase/analytics'; // Import logEvent for analytics
+import { FIREBASE_AN } from '../../FirebaseConfig'; // Import your Firebase Analytics instance
 
 const Support = () => {
   const navigation = useNavigation(); // Access navigation object
+  const [startTime, setStartTime] = useState<number>(0);
+
+
+  useEffect(() => {
+    // Log screen view when component mounts
+    logEvent(FIREBASE_AN, 'support_screen_view', {
+      screen_name: 'Support',
+    });
+
+    // Start timer when component mounts
+    setStartTime(Date.now());
+
+    return () => {
+      // Calculate duration and log event when the component unmounts
+      const duration = (Date.now() - startTime) / 1000; // Duration in seconds
+      logEvent(FIREBASE_AN, 'support_page_duration', {
+        screen_name: 'Support',
+        duration,
+      });
+    };
+  }, []);
+
+  const handleEmailPress = () => {
+    // Log the email click event
+    logEvent(FIREBASE_AN, 'email_click', {
+      email: 'aliceb@hs.uci.edu',
+    });
+    // Open the email link
+    Linking.openURL('mailto:aliceb@hs.uci.edu?').catch((err) => console.error("Couldn't load email client", err));
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       {/* Custom back button at the top of the screen */}
@@ -20,7 +53,7 @@ const Support = () => {
             For concerns about this study, please contact Alice Sherman-Brown
            </Text>
            <Text style={styles.emailText} // Styling to make it look like a link
-              onPress={() => Linking.openURL('mailto:aliceb@hs.uci.edu?')}>
+              onPress={handleEmailPress}>
             aliceb@hs.uci.edu 
           </Text>
           <Text style={styles.text}>

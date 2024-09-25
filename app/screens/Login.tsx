@@ -1,32 +1,70 @@
 import { View, Text, StyleSheet, TextInput, ActivityIndicator, Button, KeyboardAvoidingView, Linking, Alert } from 'react-native';
-import React, { useState } from 'react';
-import { FIREBASE_AUTH } from '../../FirebaseConfig';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import React, { useState, useEffect } from 'react';
+import { FIREBASE_AUTH, FIREBASE_AN } from '../../FirebaseConfig'; // Ensure FIREBASE_AN is initialized with getAnalytics()
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { logEvent } from 'firebase/analytics'; // Import logEvent from firebase/analytics
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [loading, setLoading] = useState(false);
     const auth = FIREBASE_AUTH;
 
+    useEffect(() => {
+        // Log custom screen view event
+        const logScreenView = async () => {
+            logEvent(FIREBASE_AN, 'login_screen_view', {
+                screen_name: 'Login',
+            });
+        };
+
+        logScreenView();
+
+        const startTime = Date.now();
+
+        // Track duration spent on Login screen
+        return () => {
+            const duration = (Date.now() - startTime) / 1000; // Time in seconds
+            logEvent(FIREBASE_AN, 'page_duration', {
+                screen_name: 'Login',
+                duration,
+            });
+        };
+    }, []);
+
     const signIn = async () => {
         setLoading(true);
         try {
+            // Log the sign in attempt
+            logEvent(FIREBASE_AN, 'login_attempt', {
+                email: email.toLowerCase(),
+            });
+
             const response = await signInWithEmailAndPassword(auth, email + '@example.com', email.toLowerCase());
             console.log(response);
         } catch (error: any) {
             console.log(error);
             alert('Sign in failed: ' + error.message);
+
+            // Log the failure event
+            logEvent(FIREBASE_AN, 'login_failure', {
+                error: error.message,
+            });
         } finally {
             setLoading(false);
         }
-    }
+    };
 
     const signUp = () => {
         const emailAddress = 'herolab@uci.edu';
         const subject = 'Account Creation Request';
         const body = 'Hello, I would like to create an account for the Preeclampsia Educational Project Study. Please provide further instructions.';
 
-        // Open the email client with a pre-filled email to 'herolab@uci.edu'
+        // Log the sign up button click
+        logEvent(FIREBASE_AN, 'signup_email_click', {
+            email: emailAddress,
+        });
+
+        // Open the email client with a pre-filled email
         Linking.openURL(`mailto:${emailAddress}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`)
             .catch((err) => {
                 console.log('Error opening email client: ', err);
@@ -35,6 +73,11 @@ const Login = () => {
                     'Unable to open email client. Please manually email herolab@uci.edu to create an account.',
                     [{ text: 'OK' }]
                 );
+
+                // Log email client opening error
+                logEvent(FIREBASE_AN, 'signup_email_error', {
+                    error: err.message,
+                });
             });
     };
 
@@ -44,17 +87,19 @@ const Login = () => {
                 Preeclampsia Educational Project Study
             </Text>
             <KeyboardAvoidingView behavior='padding'>
-                <TextInput value = {email}
-                            style={styles.input} 
-                            placeholder='Username' 
-                            autoCapitalize='none'
-                            onChangeText={(text) => setEmail(text)}>            
-                </TextInput>
-                { loading ? ( <ActivityIndicator size='large' color='#0000ff' />
+                <TextInput
+                    value={email}
+                    style={styles.input}
+                    placeholder='Username'
+                    autoCapitalize='none'
+                    onChangeText={(text) => setEmail(text)}
+                />
+                {loading ? (
+                    <ActivityIndicator size='large' color='#0000ff' />
                 ) : (
                     <>
-                        <Button title='Login' onPress={signIn}/>
-                        <Button title='Sign Up' onPress={signUp}/>
+                        <Button title='Login' onPress={signIn} />
+                        <Button title='Sign Up' onPress={signUp} />
                     </>
                 )}
             </KeyboardAvoidingView>
@@ -79,10 +124,10 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff'
     },
     text: {
-        fontSize:50,
+        fontSize: 50,
         textAlign: 'center',
         color: 'black',
-        marginHorizontal:5,
-        marginBottom:70,
+        marginHorizontal: 5,
+        marginBottom: 70,
     }
 });

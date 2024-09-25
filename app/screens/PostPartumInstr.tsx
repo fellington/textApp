@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { SafeAreaView, View, Text, StyleSheet, ScrollView, TouchableOpacity, FlatList } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { FIREBASE_AN } from '../../FirebaseConfig'; // Import your analytics instance
+import { logEvent } from 'firebase/analytics';
 
 interface DataItem {
   key: string;
@@ -21,9 +23,39 @@ const list2 = [
 
 export default function PostPartumInstr() {
   const navigation = useNavigation(); // Access navigation object
+  const [startTime, setStartTime] = useState<number>(0);
+  const [scrolledToBottom, setScrolledToBottom] = useState<boolean>(false);
+
+  useEffect(() => {
+    // Log screen view when component mounts
+    logEvent(FIREBASE_AN, 'instr_screen_view', {
+      screen_name: 'PostPartumInstructions',
+    });
+
+    // Start timer when component mounts
+    setStartTime(Date.now());
+
+    return () => {
+      // Calculate duration and log event when the component unmounts
+      const duration = (Date.now() - startTime) / 1000; // Duration in seconds
+      logEvent(FIREBASE_AN, 'instr_page_duration', {
+        screen_name: 'PostPartumInstructions',
+        duration,
+        scrolled_to_bottom: scrolledToBottom,
+      });
+    };
+  }, [scrolledToBottom]);
+
+  const handleScroll = (event: any) => {
+    const { contentOffset, layoutMeasurement, contentSize } = event.nativeEvent;
+    const isAtBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - 20; // Adjust the offset if needed
+
+    if (isAtBottom && !scrolledToBottom) {
+      setScrolledToBottom(true);
+    }
+  };
 
   const renderItem = ({ item }: { item: DataItem }) => {
-    // Split the sentence where you want to bold "140/90"
     const parts = item.text.split('140/90');
 
     return (
@@ -45,7 +77,7 @@ export default function PostPartumInstr() {
         <Text style={styles.backButtonText}>Back</Text>
       </TouchableOpacity>
       
-      <ScrollView>
+      <ScrollView onScroll={handleScroll} scrollEventThrottle={16}>
         <View style={styles.container}>
           <Text style={styles.headerText}>Preeclampsia Discharge Instructions</Text>
           
@@ -100,13 +132,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginVertical: 20,
     marginTop: 50,
-  },
-  subHeaderText: {
-    fontSize: 25,
-    fontWeight: 'bold',
-    color: 'black',
-    marginTop: 30,
-    marginBottom: 10,
   },
   bodyText: {
     fontSize: 20,

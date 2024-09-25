@@ -27,11 +27,14 @@ export default function App() {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    onAuthStateChanged(FIREBASE_AUTH, (user) => {
+    const unsubscribe = onAuthStateChanged(FIREBASE_AUTH, (user) => {
       console.log('user', user);
       setUser(user);
     });
+
+    return () => unsubscribe();
   }, []);
+  
   return (
     <NavigationContainer> 
       <Stack.Navigator initialRouteName = 'Login'>
