@@ -1,54 +1,20 @@
 import { View, Text, StyleSheet, TextInput, ActivityIndicator, Button, KeyboardAvoidingView, Linking, Alert } from 'react-native';
-import React, { useState, useEffect } from 'react';
-import { FIREBASE_AUTH, FIREBASE_AN } from '../../FirebaseConfig'; // Ensure FIREBASE_AN is initialized with getAnalytics()
+import React, { useState } from 'react';
+import { FIREBASE_AUTH } from '../../FirebaseConfig'; // Ensure FIREBASE_AN is initialized with getAnalytics()
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { logEvent } from 'firebase/analytics'; // Import logEvent from firebase/analytics
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [loading, setLoading] = useState(false);
     const auth = FIREBASE_AUTH;
-
-    useEffect(() => {
-        // Log custom screen view event
-        const logScreenView = async () => {
-            logEvent(FIREBASE_AN, 'login_screen_view', {
-                screen_name: 'Login',
-            });
-        };
-
-        logScreenView();
-
-        const startTime = Date.now();
-
-        // Track duration spent on Login screen
-        return () => {
-            const duration = (Date.now() - startTime) / 1000; // Time in seconds
-            logEvent(FIREBASE_AN, 'page_duration', {
-                screen_name: 'Login',
-                duration,
-            });
-        };
-    }, []);
-
     const signIn = async () => {
         setLoading(true);
         try {
-            // Log the sign in attempt
-            logEvent(FIREBASE_AN, 'login_attempt', {
-                email: email.toLowerCase(),
-            });
-
             const response = await signInWithEmailAndPassword(auth, email + '@example.com', email.toLowerCase());
             console.log(response);
         } catch (error: any) {
             console.log(error);
             alert('Sign in failed: ' + error.message);
-
-            // Log the failure event
-            logEvent(FIREBASE_AN, 'login_failure', {
-                error: error.message,
-            });
         } finally {
             setLoading(false);
         }
@@ -59,11 +25,6 @@ const Login = () => {
         const subject = 'Account Creation Request';
         const body = 'Hello, I would like to create an account for the Preeclampsia Educational Project Study. Please provide further instructions.';
 
-        // Log the sign up button click
-        logEvent(FIREBASE_AN, 'signup_email_click', {
-            email: emailAddress,
-        });
-
         // Open the email client with a pre-filled email
         Linking.openURL(`mailto:${emailAddress}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`)
             .catch((err) => {
@@ -73,11 +34,6 @@ const Login = () => {
                     'Unable to open email client. Please manually email herolab@uci.edu to create an account.',
                     [{ text: 'OK' }]
                 );
-
-                // Log email client opening error
-                logEvent(FIREBASE_AN, 'signup_email_error', {
-                    error: err.message,
-                });
             });
     };
 
