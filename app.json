@@ -4,7 +4,7 @@
     "slug": "textApp",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/preps_c.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
@@ -13,12 +13,13 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.herolab.textApp"
+      "bundleIdentifier": "com.herolab.textApp",
+      "icon": "./assets/preps_c.png"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/preps_c.png",
+        "backgroundColor": "#AAE0D0"
       },
       "package": "com.herolab.textApp"
     },
