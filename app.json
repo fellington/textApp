@@ -35,6 +35,9 @@
     },
     "experiments": {
       "baseUrl": "/expo-gh-pages"
-    }
+    },
+    "plugins": [
+      "expo-router"
+    ]
   }
 }
