@@ -9,12 +9,6 @@
       "generated": true
     },
     {
-      "file": "./screens/Login.tsx",
-      "page": "/screens/Login",
-      "namedRegex": "^/screens/Login(?:/)?$",
-      "routeKeys": {}
-    },
-    {
       "file": "./screens/Support.tsx",
       "page": "/screens/Support",
       "namedRegex": "^/screens/Support(?:/)?$",
