@@ -1,6 +1,10 @@
 import React from 'react';
-import { SafeAreaView, View, Text, StyleSheet, ScrollView, TouchableOpacity, FlatList } from 'react-native';
+import { SafeAreaView, View, Text, StyleSheet, ScrollView, TouchableOpacity, FlatList, Platform, Dimensions } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { GestureHandlerRootView, PinchGestureHandler } from 'react-native-gesture-handler';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
+
+const { width, height } = Dimensions.get('window');
 
 interface DataItem {
   key: string;
@@ -20,7 +24,28 @@ const list2 = [
 ];
 
 export default function PostPartumInstr() {
-  const navigation = useNavigation(); // Access navigation object
+  const navigation = useNavigation();
+
+  // Shared value for scaling (zooming)
+  const scale = useSharedValue(1);
+
+  // Update the scale based on pinch gesture
+  const handlePinchEvent = (event: any) => {
+    scale.value = event.nativeEvent.scale;
+  };
+
+  // Reset scale after pinch ends
+  const handlePinchStateChange = ({ nativeEvent }: any) => {
+    if (nativeEvent.state === 5) { // 5 corresponds to 'State.END'
+      scale.value = withTiming(1, { duration: 300 });
+    }
+  };
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: scale.value }],
+    };
+  });
 
   const renderItem = ({ item }: { item: DataItem }) => {
     const parts = item.text.split('140/90');
@@ -38,15 +63,19 @@ export default function PostPartumInstr() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      {/* Custom back button at the top of the screen */}
-      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-        <Text style={styles.backButtonText}>Back</Text>
-      </TouchableOpacity>
-      
-      <ScrollView>
-        <View style={styles.container}>
-          <Text style={styles.headerText}>Preeclampsia Discharge Instructions</Text>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaView style={styles.safeArea}>
+        {/* Custom back button at the top of the screen */}
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Text style={styles.backButtonText}>Back</Text>
+        </TouchableOpacity>
+
+        {/* Pinch-to-zoom for the ScrollView content */}
+        <PinchGestureHandler onGestureEvent={handlePinchEvent} onHandlerStateChange={handlePinchStateChange}>
+          <Animated.View style={[styles.zoomContainer, animatedStyle]}>
+            <ScrollView>
+              <View style={styles.container}>
+              <Text style={styles.headerText}>Preeclampsia Discharge Instructions</Text>
           
           <Text style={styles.bodyText}>
             You were diagnosed with a condition called preeclampsia (pre-e-clamp-sia). This is a serious disease that can occur during pregnancy or after delivery. The only treatment for preeclampsia is delivery. You may need medications to lower your risk of seizures and treat high blood pressure. Preeclampsia is more than just high blood pressure. It can also cause seizures, strokes, fluid on the lungs, and harm to the kidneys and liver.
@@ -75,39 +104,41 @@ export default function PostPartumInstr() {
           <Text style={styles.bodyTextLast}>
             Having preeclampsia increases your risk of future health complications, including high blood pressure, heart attack, stroke, and kidney disease. You can lower these risks by maintaining a healthy lifestyle with a good diet and exercise. You should see your OBGYN within 1 week after leaving the hospital. Also, see a primary care doctor within 6 months of delivery, and every year thereafter. In your next pregnancy, taking a baby aspirin (81mg) can lower your risk of preeclampsia again.
           </Text>
-
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+              </View>
+            </ScrollView>
+          </Animated.View>
+        </PinchGestureHandler>
+      </SafeAreaView>
+    </GestureHandlerRootView>
   );
 }
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: '#e6fbf1',
   },
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: '#e6fbf1',
     padding: 10,
   },
   headerText: {
-    fontSize: 35,
+    fontSize: Platform.OS === 'web' ? 35 : 30,
     fontWeight: 'bold',
     color: 'black',
     textAlign: 'center',
     marginVertical: 20,
-    marginTop: 50,
+    marginTop: Platform.OS === 'web' ? 50 : 40,
   },
   bodyText: {
-    fontSize: 20,
+    fontSize: Platform.OS === 'web' ? 20 : 18,
     color: 'black',
     marginHorizontal: 5,
     marginTop: 25,
   },
   bodyTextLast: {
-    fontSize: 20,
+    fontSize: Platform.OS === 'web' ? 20 : 18,
     color: 'black',
     marginHorizontal: 5,
     marginTop: 25,
@@ -121,30 +152,33 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   bulletPoint: {
-    fontSize: 20,
+    fontSize: Platform.OS === 'web' ? 20 : 18,
     color: 'black',
     marginRight: 5,
   },
   bulletText: {
-    fontSize: 20,
+    fontSize: Platform.OS === 'web' ? 20 : 18,
     color: 'black',
     flex: 1,
   },
   boldText: {
     fontWeight: 'bold',
-    fontSize: 20,
+    fontSize: Platform.OS === 'web' ? 20 : 18,
   },
   backButton: {
     position: 'absolute',
-    top: 70,
+    top: 20,
     left: 20,
     zIndex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)', 
+    backgroundColor: 'rgba(0, 0, 0, 0.4)', // Semi-transparent background
     padding: 10,
     borderRadius: 5,
   },
   backButtonText: {
     color: 'white',
-    fontSize: 10,
+    fontSize: Platform.OS === 'web' ? 10 : 5,
+  },
+  zoomContainer: {
+    flex: 1,
   },
 });

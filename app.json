@@ -13,7 +13,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.herolab.textApp",
+      "bundleIdentifier": "com.herolab.textapp2",
       "icon": "./assets/preps_c.png"
     },
     "android": {
