@@ -24,12 +24,17 @@
       "package": "com.herolab.textApp"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "output": "server",
+      "bundler": "metro"
     },
     "extra": {
       "eas": {
         "projectId": "9d6f4eae-be2c-498f-8231-d4a84ce63047"
       }
+    },
+    "experiments": {
+      "baseUrl": "/expo-gh-pages"
     }
   }
 }
