@@ -2,6 +2,12 @@
   "apiRoutes": [],
   "htmlRoutes": [
     {
+      "file": "./index.js",
+      "page": "/index",
+      "namedRegex": "^/(?:/)?$",
+      "routeKeys": {}
+    },
+    {
       "file": "expo-router/build/views/Sitemap.js",
       "page": "/_sitemap",
       "namedRegex": "^/_sitemap(?:/)?$",
